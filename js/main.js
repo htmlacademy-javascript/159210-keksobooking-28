@@ -114,11 +114,6 @@ const createAdvertisments = () => {
   return newAdsList;
 };
 
-// createAdvertisments();
-
-// const advertismentsList = createAdvertisments();
-for (let i = 0; i < 3; i++) {
-  const ad = new Advertisment();
-  console.log(ad);
-}
+const advertismentsList = createAdvertisments();
+console.log(advertismentsList);
 
