@@ -31,14 +31,12 @@ const AD_PHOTOS = ['https://assets.htmlacademy.ru/content/intensive/javascript-1
 
 localStorage.clear();
 
-
-
 const randomLats = getRandomFloatList(35.65000, 35.70000, 5, 10);
 const randomLtds = getRandomFloatList(139.70000, 139.80000, 5, 10);
 
-function Advertisment() {
+function Offer() {
   this.author = {
-    avatar: `img/avatars/user${getRandomInteger(1, 10)}.png`
+    avatar: `img/avatars/user${String("0" + getRandomInteger(1, 10)).slice(-2)}.png`
   },
     this.offer = {
       title: AD_TITLES[getRandomInteger(0, AD_TITLES.length - 1)],
@@ -62,14 +60,15 @@ function Advertisment() {
     }
 };
 
-const createAdvertisments = () => {
+const createOffers = () => {
   let newAdsList = [];
   for (let i = 0; i < AD_COUNT; i++) {
-    const newAd = new Advertisment();
+    const newAd = new Offer();
     newAdsList.push(newAd);
   }
   return newAdsList;
 };
 
-const advertismentsList = createAdvertisments();
-console.log(advertismentsList);
+const offersList = createOffers();
+
+export {offersList};
