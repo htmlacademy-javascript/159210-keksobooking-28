@@ -5,34 +5,12 @@ const cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.popup');
 
-const getPlaceType = (type) => {
-  let result;
-  switch (type) {
-    case 'flat':
-      result = 'Квартира';
-      break;
-
-    case 'bungalow':
-      result = 'Бунгало';
-      break;
-
-    case 'house':
-      result = 'Дом';
-      break;
-
-    case 'palace':
-      result = 'Дворец';
-      break;
-
-    case 'hotel':
-      result = 'Отель';
-      break;
-
-    default:
-      result = 'Не указан';
-      break;
-  }
-  return result;
+const PLACE_TYPES = {
+  flat: 'Квартира',
+  bungalow: 'Бунгало',
+  house: 'Дом',
+  palace: 'Дворец',
+  hotel: 'Отель'
 };
 
 const renderCards = (data) => {
@@ -63,7 +41,7 @@ const renderCards = (data) => {
 
     cardElement.querySelector('.popup__type').textContent =
       entry.type ?
-      getPlaceType(entry.type) :
+      PLACE_TYPES[entry.type] :
       cardElement.querySelector('.popup__type').classList.add('hidden');
 
     if (entry.rooms && entry.guests) {
