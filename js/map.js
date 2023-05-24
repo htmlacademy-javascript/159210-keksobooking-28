@@ -151,8 +151,6 @@ const createCustomPopup = (entry) => {
   return cardElement;
 };
 
-console.log(offersList);
-
 offersList.forEach((entry) => {
   const marker = L.marker({
     lat: entry.offer.address.lat,
