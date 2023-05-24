@@ -1,4 +1,5 @@
-import { offersList } from './data.js';
+import { getData } from './api.js';
+import { showAlert, showSuccessMessage } from './util.js';
 
 const PLACE_TYPES = {
   flat: 'Квартира',
@@ -11,14 +12,11 @@ const PLACE_TYPES = {
 const TILE_LAYER = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 const COPYRIGHT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const DEFAULT_ZOOM = 12;
-const addressField = document.querySelector('#address');
 
 const DEFAULT_COORDINATES = {
   lat: 35.68950,
   lng: 139.69171,
 };
-
-let isMapInit = false;
 
 const MAIN_ICON_CONFIG = {
   url: './img/main-pin.svg',
@@ -30,11 +28,15 @@ const MAIN_ICON_CONFIG = {
 
 const ICON_CONFIG = {
   url: './img/pin.svg',
-  width: 52,
-  height: 52,
-  anchorX: 26,
-  anchorY: 52,
+  width: 40,
+  height: 40,
+  anchorX: 20,
+  anchorY: 40,
 };
+
+const addressField = document.querySelector('#address');
+
+let isMapInit = false;
 
 const setAddress = (lat, lng) => {
   addressField.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
@@ -85,9 +87,9 @@ const createCustomPopup = (entry) => {
       entry.offer.title :
       cardElement.querySelector('.popup__title').classList.add('hidden');
 
-  if (entry.offer.address.lat && entry.offer.address.lng) {
+  if (entry.offer.address) {
     cardElement.querySelector('.popup__text--address').textContent =
-      `Координаты: ${entry.offer.address.lat}, ${entry.offer.address.lng}`;
+      `Адрес: ${entry.offer.address}`;
   } else {
     cardElement.querySelector('.popup__text--address').classList.add('hidden');
   }
@@ -100,49 +102,49 @@ const createCustomPopup = (entry) => {
   }
 
   cardElement.querySelector('.popup__type').textContent =
-    entry.type ?
-      PLACE_TYPES[entry.type] :
+    entry.offer.type ?
+    PLACE_TYPES[entry.offer.type] :
       cardElement.querySelector('.popup__type').classList.add('hidden');
 
-  if (entry.rooms && entry.guests) {
+  if (entry.offer.rooms && entry.offer.guests) {
     cardElement.querySelector('.popup__text--capacity').textContent =
-      `${entry.rooms} комнаты для ${entry.guests}`;
+      `${entry.offer.rooms} комнаты для ${entry.offer.guests}`;
   } else {
     cardElement.querySelector('.popup__text--capacity').classList.add('hidden');
   }
 
-  if (entry.checkin && entry.checkout) {
+  if (entry.offer.checkin && entry.offer.checkout) {
     cardElement.querySelector('.popup__text--time').textContent =
-      `Заезд после ${entry.checkin}, выезд до ${entry.checkout}`;
+      `Заезд после ${entry.offer.checkin}, выезд до ${entry.offer.checkout}`;
   } else {
     cardElement.querySelector('.popup__text--time').classList.add('hidden');
   }
 
-  if (entry.features.length > 0) {
+  if (entry.offer.features) {
     cardElement.querySelectorAll('.popup__feature').forEach((feature) => {
       const thisFeature = feature.classList[1].substring(16);
-      if (!entry.features.includes(thisFeature)) {
+      if (!entry.offer.features.includes(thisFeature)) {
         feature.classList.add('hidden');
       }
     });
   } else {
-    cardElement.querySelectorAll('.popup__features').classList.add('hidden');
+    cardElement.querySelector('.popup__features').classList.add('hidden');
   }
 
   cardElement.querySelector('.popup__description').textContent =
-    entry.description ?
-      entry.description :
+    entry.offer.description ?
+    entry.offer.description :
       cardElement.querySelector('.popup__description').classList.add('hidden');
 
-  if (entry.photos.length > 0) {
+  if (entry.offer.photos) {
     cardElement.querySelector('.popup__photos').innerHTML = '';
-    for (let i = 0; i < entry.photos.length; i++) {
+    for (let i = 0; i < entry.offer.photos.length; i++) {
       const img = document.createElement('img');
       img.classList.add('popup__photo');
       img.width = '45';
       img.height = '40';
       img.alt = 'Фотография жилья';
-      img.src = entry.photos[i];
+      img.src = entry.offer.photos[i];
 
       cardElement.querySelector('.popup__photos').appendChild(img);
     }
@@ -158,18 +160,30 @@ const createCustomPopup = (entry) => {
   return cardElement;
 };
 
-offersList.forEach((entry) => {
+const markerGroup = L.layerGroup().addTo(map);
+
+const createMarker = (entry) => {
   const marker = L.marker({
-    lat: entry.offer.address.lat,
-    lng: entry.offer.address.lng
+    lat: entry.location.lat,
+    lng: entry.location.lng
   },
-  {
-    icon: pinIcon,
-  });
+    {
+      icon: pinIcon,
+    });
 
-   marker
-    .addTo(map)
+  marker
+    .addTo(markerGroup)
     .bindPopup(createCustomPopup(entry));
-});
+};
 
-export { isMapInit };
+function renderMarkers(data) {
+  data.forEach((entry) => {
+    createMarker(entry);
+  });
+}
+
+getData(renderMarkers, showSuccessMessage, showAlert);
+
+// markerGroup.clearLayers();
+
+export { isMapInit, renderMarkers };
