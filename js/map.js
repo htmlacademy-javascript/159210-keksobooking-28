@@ -1,5 +1,7 @@
 import { getData } from './api.js';
 import { showAlert, showSuccessMessage } from './util.js';
+import { filterByType, filterByPrice, filterByRooms, filterByGuests,
+  filterByFeatures } from './filters.js';
 
 const PLACE_TYPES = {
   flat: 'Квартира',
@@ -33,6 +35,8 @@ const ICON_CONFIG = {
   anchorX: 20,
   anchorY: 40,
 };
+
+const MAX_MARKERS = 10;
 
 const addressField = document.querySelector('#address');
 
@@ -176,14 +180,31 @@ const createMarker = (entry) => {
     .bindPopup(createCustomPopup(entry));
 };
 
-function renderMarkers(data) {
-  data.forEach((entry) => {
-    createMarker(entry);
+function renderMarkers(items) {
+  items.forEach((item) => {
+    createMarker(item);
   });
 }
 
-getData(renderMarkers, showSuccessMessage, showAlert);
+let ads = [];
+let filteredAds = [];
 
-// markerGroup.clearLayers();
+const initData = (data) => {
+  ads = data;
+  rerenderMarkers(ads);
+};
 
-export { isMapInit, renderMarkers };
+const filterData = () => {
+  filteredAds = filterByFeatures(filterByGuests(filterByRooms(filterByPrice(filterByType(ads)))));
+
+  rerenderMarkers(filteredAds);
+};
+
+const rerenderMarkers = (data) => {
+  markerGroup.clearLayers();
+  renderMarkers(data.slice(0, MAX_MARKERS), markerGroup);
+};
+
+getData(initData, showSuccessMessage, showAlert);
+
+export { isMapInit, renderMarkers, filterData, filterByFeatures };

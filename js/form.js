@@ -74,6 +74,7 @@ disableMapFilters();
 
 if (isMapInit) {
   enableForm();
+  enableMapFilters();
 }
 
 const blockSubmitBtn = () => {
@@ -190,8 +191,11 @@ const setAdFormSubmit = () => {
 
     if (isValid) {
       blockSubmitBtn();
+      disableForm();
+      disableMapFilters();
       sendData(new FormData(evt.target), onSuccess, onError)
         .then(unblockSubmitBtn)
+        .then(enableForm)
         .finally(enableMapFilters);
       getData(renderMarkers, showSuccessMessage, showAlert);
     }
