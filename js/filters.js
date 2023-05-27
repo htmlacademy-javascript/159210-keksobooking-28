@@ -12,7 +12,7 @@ const PRICE_RANGES = {
   high: {
     min: 50000
   }
-}
+};
 
 const DEFAULT_FILTER_VALUE = 'any';
 
