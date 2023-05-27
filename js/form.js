@@ -1,6 +1,6 @@
-import { isMapInit, renderMarkers } from './map.js';
+import { isMapInit, renderMarkers, resetMap } from './map.js';
 import { getData, sendData } from './api.js';
-import { showSuccessMessage, showAlert, isEscapeKey } from './util.js';
+import { showAlert, isEscapeKey, debounce } from './util.js';
 
 const MAX_AD_PRICE = 100000;
 const MIN_AD_PRICE = {
@@ -41,6 +41,7 @@ const uploadAvatarField = adForm.querySelector('#avatar');
 const avatarPreview = adForm.querySelector('.ad-form-header__preview img');
 const uploadImagesField = adForm.querySelector('#images');
 const imagesPreview = adForm.querySelector('.ad-form__photo');
+const filtersForm = document.querySelector('.map__filters');
 
 const modalCases = ['error', 'success'];
 
@@ -113,6 +114,7 @@ const showModal = (result) => {
 
 const clearForm = () => {
   adForm.reset();
+  filtersForm.reset();
   sliderElement.noUiSlider.reset();
 };
 
@@ -202,6 +204,7 @@ const setAdFormSubmit = () => {
       sendData(new FormData(evt.target), onSuccess, onError)
         .then(unblockSubmitBtn)
         .then(enableForm)
+        .then(resetMap)
         .finally(enableMapFilters);
       getData(renderMarkers, showSuccessMessage, showAlert);
     }
@@ -246,6 +249,7 @@ roomNumber.addEventListener('change', () => {
 
 resetBtn.addEventListener('click', () => {
   clearForm();
+  debounce(() => resetMap())();
 });
 
 const createImageBlock = (url, parent) => {
