@@ -23,6 +23,8 @@ const PLACE_CAPACITY = {
   100: [0]
 };
 
+const FILE_TYPES = ['jpg', 'jpeg', 'png'];
+
 const adForm = document.querySelector('.ad-form');
 const mapFilters = document.querySelector('.map__filters');
 const titleField = adForm.querySelector('#title');
@@ -35,6 +37,10 @@ const roomNumber = adForm.querySelector('#room_number');
 const placeCapacity = adForm.querySelector('#capacity');
 const submitBtn = adForm.querySelector('.ad-form__submit');
 const resetBtn = adForm.querySelector('.ad-form__reset');
+const uploadAvatarField = adForm.querySelector('#avatar');
+const avatarPreview = adForm.querySelector('.ad-form-header__preview img');
+const uploadImagesField = adForm.querySelector('#images');
+const imagesPreview = adForm.querySelector('.ad-form__photo');
 
 const modalCases = ['error', 'success'];
 
@@ -240,6 +246,39 @@ roomNumber.addEventListener('change', () => {
 
 resetBtn.addEventListener('click', () => {
   clearForm();
+});
+
+const createImageBlock = (url, parent) => {
+  const img = document.createElement('img');
+  img.src = url;
+  img.width = '70';
+  img.height = '70';
+  img.style.objectFit = 'contain';
+  parent.appendChild(img);
+};
+
+const uploadImage = (uploadField, previewBlock, purpose) => {
+  const file = uploadField.files[0];
+  const fileName = file.name.toLowerCase();
+
+  const matches = FILE_TYPES.some((ft) => fileName.endsWith(ft));
+
+  if (matches) {
+    if (purpose === 'avatar') {
+      previewBlock.src = URL.createObjectURL(file);
+    } else if (purpose === 'photo') {
+      previewBlock.innerHTML = '';
+      createImageBlock(URL.createObjectURL(file), previewBlock);
+    }
+  }
+};
+
+uploadAvatarField.addEventListener('change', () => {
+  uploadImage(uploadAvatarField, avatarPreview, 'avatar');
+});
+
+uploadImagesField.addEventListener('change', () => {
+  uploadImage(uploadImagesField, imagesPreview, 'photo');
 });
 
 setAdFormSubmit();
