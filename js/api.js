@@ -13,12 +13,11 @@ const GET_DATA_ERROR_MESSAGE = 'Не удалось загрузить данн�
 const load = (route, method = Method.GET, body = null) =>
   fetch(`${BASE_URL}${route}`, { method, body });
 
-const getData = (renderData, onSuccess, onError) =>
+const getData = (renderData, onError) =>
   load(Route.GET_DATA)
     .then((response) => response.json())
     .then((data) => {
       renderData(data);
-      onSuccess();
     })
     .catch(() => {
       onError(GET_DATA_ERROR_MESSAGE);
