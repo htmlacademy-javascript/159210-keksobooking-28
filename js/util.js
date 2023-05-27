@@ -50,10 +50,6 @@ const getRandomFloatList = (min, max, decimals, count) => {
   return newFloatList
 }
 
-const showSuccessMessage = () => {
-  console.log('success');
-};
-
 const showAlert = (message) => {
   const alertContainer = document.createElement('div');
   alertContainer.style.zIndex = '100';
@@ -77,7 +73,7 @@ const showAlert = (message) => {
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-function debounce(callback, timeoutDelay = 500) {
+function debounce(callback, timeoutDelay = 100) {
   let timeoutId;
 
   return (...rest) => {
@@ -99,4 +95,4 @@ function throttle(callback, delayBetweenFrames) {
 }
 
 export {getRandomInteger, getRandomNumsArray, getRandomFloat, getRandomFloatList,
-  createList, showSuccessMessage, showAlert, isEscapeKey, debounce, throttle};
+  createList, showAlert, isEscapeKey, debounce, throttle};
