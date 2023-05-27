@@ -1,6 +1,6 @@
 import { isMapInit, renderMarkers, resetMap } from './map.js';
 import { getData, sendData } from './api.js';
-import { showAlert, isEscapeKey, debounce } from './util.js';
+import { showAlert, isEscapeKey, debounce, DEFAULT_RADIX } from './util.js';
 
 const MAX_AD_PRICE = 100000;
 const MIN_AD_PRICE = {
@@ -50,7 +50,7 @@ const setInteractiveElementsAvalibility =
     container.querySelectorAll(selector).forEach((element) => {
       element.disabled = state;
     });
-};
+  };
 
 const disableForm = () => {
   adForm.classList.add('ad-form--disabled');
@@ -105,7 +105,7 @@ const showModal = (result) => {
 
   document.body.appendChild(modalElement);
 
-  document.querySelector(`.${result}`).addEventListener('click', (evt) => {
+  document.querySelector(`.${result}`).addEventListener('click', () => {
     closeModal(result);
   });
 
@@ -169,7 +169,7 @@ function validateAdPrice(value) {
 }
 
 function validateCapacity(value) {
-  return PLACE_CAPACITY[roomNumber.value].includes(parseInt(value));
+  return PLACE_CAPACITY[roomNumber.value].includes(parseInt(value, DEFAULT_RADIX));
 }
 
 typeField.addEventListener('change', () => {
@@ -180,14 +180,14 @@ typeField.addEventListener('change', () => {
 timeInField.addEventListener('change', (evt) => {
   const timeOutOptions = timeOutField.querySelectorAll('option');
   timeOutOptions.forEach((option) => {
-    option.value == evt.target.value ? option.selected = true : option.selected = false;
+    option.selected = option.value === evt.target.value;
   });
 });
 
 timeOutField.addEventListener('change', (evt) => {
   const timeInOptions = timeInField.querySelectorAll('option');
   timeInOptions.forEach((option) => {
-    option.value == evt.target.value ? option.selected = true : option.selected = false;
+    option.selected = option.value === evt.target.value;
   });
 });
 
@@ -206,7 +206,7 @@ const setAdFormSubmit = () => {
         .then(enableForm)
         .then(resetMap)
         .finally(enableMapFilters);
-      getData(renderMarkers, showSuccessMessage, showAlert);
+      getData(renderMarkers, showAlert);
     }
   });
 };

@@ -43,7 +43,7 @@ const addressField = document.querySelector('#address');
 let isMapInit = false;
 
 const setAddress = (lat, lng) => {
-  addressField.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
+  addressField.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 };
 
 setAddress(DEFAULT_COORDINATES.lat, DEFAULT_COORDINATES.lng);
@@ -107,7 +107,7 @@ const createCustomPopup = (entry) => {
 
   cardElement.querySelector('.popup__type').textContent =
     entry.offer.type ?
-    PLACE_TYPES[entry.offer.type] :
+      PLACE_TYPES[entry.offer.type] :
       cardElement.querySelector('.popup__type').classList.add('hidden');
 
   if (entry.offer.rooms && entry.offer.guests) {
@@ -137,7 +137,7 @@ const createCustomPopup = (entry) => {
 
   cardElement.querySelector('.popup__description').textContent =
     entry.offer.description ?
-    entry.offer.description :
+      entry.offer.description :
       cardElement.querySelector('.popup__description').classList.add('hidden');
 
   if (entry.offer.photos) {
@@ -168,12 +168,12 @@ const markerGroup = L.layerGroup().addTo(map);
 
 const createMarker = (entry) => {
   const marker = L.marker({
-      lat: entry.location.lat,
-      lng: entry.location.lng
-    },
-    {
-      icon: pinIcon,
-    });
+    lat: entry.location.lat,
+    lng: entry.location.lng
+  },
+  {
+    icon: pinIcon,
+  });
 
   marker
     .addTo(markerGroup)
@@ -185,6 +185,11 @@ function renderMarkers(items) {
     createMarker(item);
   });
 }
+
+const rerenderMarkers = (data) => {
+  markerGroup.clearLayers();
+  renderMarkers(data.slice(0, MAX_MARKERS), markerGroup);
+};
 
 let ads = [];
 let filteredAds = [];
@@ -198,11 +203,6 @@ const filterData = () => {
   filteredAds = filterByFeatures(filterByGuests(filterByRooms(filterByPrice(filterByType(ads)))));
 
   rerenderMarkers(filteredAds);
-};
-
-const rerenderMarkers = (data) => {
-  markerGroup.clearLayers();
-  renderMarkers(data.slice(0, MAX_MARKERS), markerGroup);
 };
 
 getData(initData, showAlert);

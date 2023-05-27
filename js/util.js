@@ -1,5 +1,7 @@
 const ALERT_SHOW_TIME = 5000;
 
+const DEFAULT_RADIX = 10;
+
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
   const upper = Math.floor(Math.max(a, b));
@@ -29,12 +31,14 @@ const getRandomNumsArray = (count, maxNum = count) => {
 };
 
 const createList = (source) => {
-  const listLength = getRandomInteger(1, source.length);
+  let listLength = getRandomInteger(1, source.length);
 
-  if (source.length < listLength) listLength = source.length;
+  if (source.length < listLength) {
+    listLength = source.length;
+  }
 
   const itemsNums = getRandomNumsArray(listLength, source.length - 1);
-  let newItemsList = [];
+  const newItemsList = [];
   for (let i = 0; i < listLength; i++) {
     newItemsList.push(source[itemsNums[i]]);
   }
@@ -42,13 +46,13 @@ const createList = (source) => {
 };
 
 const getRandomFloatList = (min, max, decimals, count) => {
-  let newFloatList = [];
+  const newFloatList = [];
   for (let i = 0; i < count; i++) {
     const newFloat = getRandomFloat(min, max, decimals);
     newFloatList.push(newFloat);
   }
-  return newFloatList
-}
+  return newFloatList;
+};
 
 const showAlert = (message) => {
   const alertContainer = document.createElement('div');
@@ -95,4 +99,4 @@ function throttle(callback, delayBetweenFrames) {
 }
 
 export {getRandomInteger, getRandomNumsArray, getRandomFloat, getRandomFloatList,
-  createList, showAlert, isEscapeKey, debounce, throttle};
+  createList, showAlert, isEscapeKey, debounce, throttle, DEFAULT_RADIX};

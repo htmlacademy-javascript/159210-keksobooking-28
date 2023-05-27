@@ -1,5 +1,5 @@
 import { filterData } from './map.js';
-import { debounce } from './util.js';
+import { debounce, DEFAULT_RADIX } from './util.js';
 
 const PRICE_RANGES = {
   middle: {
@@ -26,7 +26,7 @@ const currentFilters = {
   rooms: DEFAULT_FILTER_VALUE,
   guests: DEFAULT_FILTER_VALUE,
   features: []
-}
+};
 
 filtersForm.addEventListener('change', (evt) => {
   if (evt.target.closest('select')) {
@@ -46,11 +46,10 @@ filtersForm.addEventListener('change', (evt) => {
   debounce(() => filterData(), RERENDER_DELAY)();
 });
 
-const filterByType = (data) => {
-  return currentFilters.type === DEFAULT_FILTER_VALUE ?
+const filterByType = (data) =>
+  currentFilters.type === DEFAULT_FILTER_VALUE ?
     data :
     data.filter((item) => item.offer.type === currentFilters.type);
-};
 
 const filterByPrice = (data) => {
   switch (currentFilters.price) {
@@ -73,28 +72,24 @@ const filterByPrice = (data) => {
   }
 };
 
-const filterByRooms = (data) => {
-  return currentFilters.rooms === DEFAULT_FILTER_VALUE ?
+const filterByRooms = (data) =>
+  currentFilters.rooms === DEFAULT_FILTER_VALUE ?
     data :
-    data.filter((item) => item.offer.rooms === parseInt(currentFilters.rooms));
-};
+    data.filter((item) => item.offer.rooms === parseInt(currentFilters.rooms, DEFAULT_RADIX));
 
-const filterByGuests = (data) => {
-  return currentFilters.guests === DEFAULT_FILTER_VALUE ?
+const filterByGuests = (data) =>
+  currentFilters.guests === DEFAULT_FILTER_VALUE ?
     data :
-    data.filter((item) => item.offer.guests === parseInt(currentFilters.guests));
-};
+    data.filter((item) => item.offer.guests === parseInt(currentFilters.guests, DEFAULT_RADIX));
 
-const filterByFeatures = (data) => {
-  return data.filter((item) => {
-    return currentFilters.features.every((feature) => {
-      if (item.offer.features)
+const filterByFeatures = (data) =>
+  data.filter((item) =>
+    currentFilters.features.every((feature) => {
+      if (item.offer.features) {
         return item.offer.features.includes(feature);
-
+      }
       return false;
-    });
-  });
-};
+    }));
 
 const resetFilters = () => {
   filtersForm.reset();
