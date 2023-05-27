@@ -1,5 +1,5 @@
 import { getData } from './api.js';
-import { showAlert, showSuccessMessage } from './util.js';
+import { showAlert } from './util.js';
 import { filterByType, filterByPrice, filterByRooms, filterByGuests,
   filterByFeatures } from './filters.js';
 
@@ -168,9 +168,9 @@ const markerGroup = L.layerGroup().addTo(map);
 
 const createMarker = (entry) => {
   const marker = L.marker({
-    lat: entry.location.lat,
-    lng: entry.location.lng
-  },
+      lat: entry.location.lat,
+      lng: entry.location.lng
+    },
     {
       icon: pinIcon,
     });
@@ -205,6 +205,16 @@ const rerenderMarkers = (data) => {
   renderMarkers(data.slice(0, MAX_MARKERS), markerGroup);
 };
 
-getData(initData, showSuccessMessage, showAlert);
+getData(initData, showAlert);
 
-export { isMapInit, renderMarkers, filterData, filterByFeatures };
+function resetMap() {
+  if (document.querySelector('.leaflet-popup')) {
+    document.querySelector('.leaflet-popup').remove();
+  }
+
+  map.setView(DEFAULT_COORDINATES, DEFAULT_ZOOM);
+  mainMarker.setLatLng(DEFAULT_COORDINATES);
+  setAddress(DEFAULT_COORDINATES.lat, DEFAULT_COORDINATES.lng);
+}
+
+export { isMapInit, renderMarkers, filterData, resetMap };
