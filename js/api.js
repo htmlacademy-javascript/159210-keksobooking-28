@@ -13,15 +13,9 @@ const GET_DATA_ERROR_MESSAGE = 'Не удалось загрузить данн�
 const load = (route, method = Method.GET, body = null) =>
   fetch(`${BASE_URL}${route}`, { method, body });
 
-const getData = (renderData, onError) =>
+const getData = () =>
   load(Route.GET_DATA)
-    .then((response) => response.json())
-    .then((data) => {
-      renderData(data);
-    })
-    .catch(() => {
-      onError(GET_DATA_ERROR_MESSAGE);
-    });
+    .then((response) => response.json());
 
 const sendData = (body, onSuccess, onError) =>
   load(Route.SEND_DATA, Method.POST, body)
@@ -32,8 +26,6 @@ const sendData = (body, onSuccess, onError) =>
         onError();
       }
     })
-    .catch(() => {
-      onError();
-    });
+    .catch(onError);
 
-export { getData, sendData };
+export { getData, sendData, GET_DATA_ERROR_MESSAGE };
