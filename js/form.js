@@ -1,6 +1,7 @@
 import { isMapInit, renderMarkers, resetMap } from './map.js';
 import { getData, sendData } from './api.js';
-import { showAlert, isEscapeKey, debounce, DEFAULT_RADIX } from './util.js';
+import { showAlert, isEscapeKey, debounce, setInteractiveElementsAvailability } from './util.js';
+import { resetFilters } from './filters.js';
 
 const MAX_AD_PRICE = 100000;
 const MIN_AD_PRICE = {
@@ -14,7 +15,7 @@ const SLIDER_SETS = {
   min: 0,
   max: 100000,
   step: 1000,
-  start: 5000
+  start: 1000
 };
 const PLACE_CAPACITY = {
   1: [1],
@@ -26,7 +27,6 @@ const PLACE_CAPACITY = {
 const FILE_TYPES = ['jpg', 'jpeg', 'png'];
 
 const adForm = document.querySelector('.ad-form');
-const mapFilters = document.querySelector('.map__filters');
 const titleField = adForm.querySelector('#title');
 const priceField = adForm.querySelector('#price');
 const typeField = adForm.querySelector('#type');
@@ -41,47 +41,25 @@ const uploadAvatarField = adForm.querySelector('#avatar');
 const avatarPreview = adForm.querySelector('.ad-form-header__preview img');
 const uploadImagesField = adForm.querySelector('#images');
 const imagesPreview = adForm.querySelector('.ad-form__photo');
-const filtersForm = document.querySelector('.map__filters');
 
 const modalCases = ['error', 'success'];
 
-const setInteractiveElementsAvalibility =
-  (selector, container = document, state = true) => {
-    container.querySelectorAll(selector).forEach((element) => {
-      element.disabled = state;
-    });
-  };
-
 const disableForm = () => {
   adForm.classList.add('ad-form--disabled');
-  setInteractiveElementsAvalibility('input', adForm, true);
-  setInteractiveElementsAvalibility('button', adForm, true);
-};
-
-const disableMapFilters = () => {
-  mapFilters.classList.add('map__filters--disabled');
-  setInteractiveElementsAvalibility('select', mapFilters, true);
-  setInteractiveElementsAvalibility('fieldset', mapFilters, true);
+  setInteractiveElementsAvailability('input', adForm, true);
+  setInteractiveElementsAvailability('button', adForm, true);
 };
 
 const enableForm = () => {
   adForm.classList.remove('ad-form--disabled');
-  setInteractiveElementsAvalibility('input', adForm, false);
-  setInteractiveElementsAvalibility('button', adForm, false);
-};
-
-const enableMapFilters = () => {
-  mapFilters.classList.remove('map__filters--disabled');
-  setInteractiveElementsAvalibility('select', mapFilters, false);
-  setInteractiveElementsAvalibility('fieldset', mapFilters, false);
+  setInteractiveElementsAvailability('input', adForm, false);
+  setInteractiveElementsAvailability('button', adForm, false);
 };
 
 disableForm();
-disableMapFilters();
 
 if (isMapInit) {
   enableForm();
-  enableMapFilters();
 }
 
 const blockSubmitBtn = () => {
@@ -114,7 +92,7 @@ const showModal = (result) => {
 
 const clearForm = () => {
   adForm.reset();
-  filtersForm.reset();
+  resetFilters();
   sliderElement.noUiSlider.reset();
 };
 
@@ -153,23 +131,38 @@ const pristine = new Pristine(adForm, {
   errorTextClass: 'text-help'
 });
 
-pristine.addValidator(titleField, validateAdTitle, 'Заголовок не соответствует правилам');
-pristine.addValidator(priceField, validateAdPrice, 'Цена не соответствует правилам');
-pristine.addValidator(placeCapacity, validateCapacity, 'Слишком маленькое место для указанного количества гостей');
+const ERROR_MESSAGES = {
+  title: 'Длина заголовка должна быть от 30 до 100 символов',
+  priceLow: (limit) => `Для указанного типа жилья цена должна быть не менее ${limit} руб.`,
+  priceHigh: `Цена не может быть более ${MAX_AD_PRICE} руб.`,
+  capacity: 'Cтолько гостей не разместить в таком количестве комнат'
+};
+
+pristine.addValidator(titleField, validateAdTitle, ERROR_MESSAGES.title);
+pristine.addValidator(priceField, validateAdLowPrice, () => ERROR_MESSAGES.priceLow(MIN_AD_PRICE[typeField.value]));
+pristine.addValidator(priceField, validateAdHighPrice, () => ERROR_MESSAGES.priceHigh);
+pristine.addValidator(placeCapacity, validateCapacity, ERROR_MESSAGES.capacity);
 
 function validateAdTitle(value) {
   const exp = /[\w\d\s\n\W]{30,100}/i;
   return exp.test(value);
 }
 
-function validateAdPrice(value) {
+function validateAdLowPrice(value) {
   const exp = /[0-9]/g;
   const minPrice = MIN_AD_PRICE[typeField.value];
-  return exp.test(value) && value <= MAX_AD_PRICE && value >= minPrice;
+
+  return exp.test(value) && value >= minPrice;
+}
+
+function validateAdHighPrice(value) {
+  const exp = /[0-9]/g;
+
+  return exp.test(value) && value <= MAX_AD_PRICE;
 }
 
 function validateCapacity(value) {
-  return PLACE_CAPACITY[roomNumber.value].includes(parseInt(value, DEFAULT_RADIX));
+  return PLACE_CAPACITY[roomNumber.value].includes(Number(value));
 }
 
 typeField.addEventListener('change', () => {
@@ -198,14 +191,15 @@ const setAdFormSubmit = () => {
     const isValid = pristine.validate();
 
     if (isValid) {
+      const newData = new FormData(evt.target);
       blockSubmitBtn();
       disableForm();
-      disableMapFilters();
-      sendData(new FormData(evt.target), onSuccess, onError)
-        .then(unblockSubmitBtn)
-        .then(enableForm)
-        .then(resetMap)
-        .finally(enableMapFilters);
+      sendData(newData, onSuccess, onError)
+        .then(() => {
+          unblockSubmitBtn();
+          enableForm();
+          resetMap();
+        });
       getData(renderMarkers, showAlert);
     }
   });
