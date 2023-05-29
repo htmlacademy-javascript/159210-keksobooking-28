@@ -37,6 +37,8 @@ const ICON_CONFIG = {
 
 const MAX_MARKERS = 10;
 
+const MAP_MARKER_PAN_PADDING = [100, 100];
+
 const addressField = document.querySelector('#address');
 
 let isMapInit = false;
@@ -68,6 +70,8 @@ const pinIcon = L.icon({
 const mainMarker = L.marker(DEFAULT_COORDINATES, {
   draggable: true,
   icon: mainPinIcon,
+  autoPan: true,
+  autoPanPadding: L.point(MAP_MARKER_PAN_PADDING)
 });
 
 L.tileLayer(TILE_LAYER, {
