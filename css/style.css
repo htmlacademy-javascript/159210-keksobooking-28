@@ -1048,3 +1048,17 @@ fieldset {
 .hidden {
   display: none;
 }
+
+/* Сообщение об ошибке получения данных с сервера */
+
+.alert-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  padding: 10px 3px;
+  font-size: 20px;
+  text-align: center;
+  background-color: #ff0000;
+  z-index: 100;
+}
