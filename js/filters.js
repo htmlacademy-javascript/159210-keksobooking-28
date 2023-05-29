@@ -1,18 +1,5 @@
-import { filterData } from './map.js';
-import { debounce, DEFAULT_RADIX } from './util.js';
-
-const PRICE_RANGES = {
-  middle: {
-    min: 10000,
-    max: 50000
-  },
-  low: {
-    max: 10000
-  },
-  high: {
-    min: 50000
-  }
-};
+import { debounce, setInteractiveElementsAvailability } from './util.js';
+import { ads, rerenderMarkers } from './map.js';
 
 const DEFAULT_FILTER_VALUE = 'any';
 
@@ -26,6 +13,19 @@ const currentFilters = {
   rooms: DEFAULT_FILTER_VALUE,
   guests: DEFAULT_FILTER_VALUE,
   features: []
+};
+
+const priceRanges = {
+  middle: {
+    min: 10000,
+    max: 50000
+  },
+  low: {
+    max: 10000
+  },
+  high: {
+    min: 50000
+  }
 };
 
 filtersForm.addEventListener('change', (evt) => {
@@ -46,44 +46,50 @@ filtersForm.addEventListener('change', (evt) => {
   debounce(() => filterData(), RERENDER_DELAY)();
 });
 
-const filterByType = (data) =>
-  currentFilters.type === DEFAULT_FILTER_VALUE ?
-    data :
-    data.filter((item) => item.offer.type === currentFilters.type);
+let filteredAds = [];
 
-const filterByPrice = (data) => {
+function filterData() {
+  // filter by type
+  filteredAds = ads;
+  filteredAds = currentFilters.type === DEFAULT_FILTER_VALUE ?
+    filteredAds :
+    filteredAds.filter((item) => item.offer.type === currentFilters.type);
+
+  // filter by price
   switch (currentFilters.price) {
     case DEFAULT_FILTER_VALUE:
-      return data;
+      break;
 
     case 'middle':
-      return data.filter((item) =>
-        item.offer.price >= PRICE_RANGES.middle.min &&
-        item.offer.price < PRICE_RANGES.middle.max);
+      filteredAds = filteredAds.filter((item) =>
+        item.offer.price >= priceRanges.middle.min &&
+        item.offer.price < priceRanges.middle.max);
+      break;
 
     case 'low':
-      return data.filter((item) => item.offer.price < PRICE_RANGES.low.max);
+      filteredAds = filteredAds.filter((item) => item.offer.price < priceRanges.low.max);
+      break;
 
     case 'high':
-      return data.filter((item) => item.offer.price >= PRICE_RANGES.high.min);
+      filteredAds = filteredAds.filter((item) => item.offer.price >= priceRanges.high.min);
+      break;
 
     default:
       break;
   }
-};
 
-const filterByRooms = (data) =>
-  currentFilters.rooms === DEFAULT_FILTER_VALUE ?
-    data :
-    data.filter((item) => item.offer.rooms === parseInt(currentFilters.rooms, DEFAULT_RADIX));
+  // filter by rooms
+  filteredAds = currentFilters.rooms === DEFAULT_FILTER_VALUE ?
+    filteredAds :
+    filteredAds.filter((item) => item.offer.rooms === Number(currentFilters.rooms));
 
-const filterByGuests = (data) =>
-  currentFilters.guests === DEFAULT_FILTER_VALUE ?
-    data :
-    data.filter((item) => item.offer.guests === parseInt(currentFilters.guests, DEFAULT_RADIX));
+  // filter by guests
+  filteredAds = currentFilters.guests === DEFAULT_FILTER_VALUE ?
+    filteredAds :
+    filteredAds.filter((item) => item.offer.guests === Number(currentFilters.guests));
 
-const filterByFeatures = (data) =>
-  data.filter((item) =>
+  // filter by features
+  filteredAds = filteredAds.filter((item) =>
     currentFilters.features.every((feature) => {
       if (item.offer.features) {
         return item.offer.features.includes(feature);
@@ -91,9 +97,25 @@ const filterByFeatures = (data) =>
       return false;
     }));
 
+  rerenderMarkers(filteredAds);
+}
+
 const resetFilters = () => {
   filtersForm.reset();
 };
 
-export { currentFilters, filterByType, filterByPrice, filterByRooms, filterByGuests,
-  filterByFeatures, resetFilters };
+const disableMapFilters = () => {
+  filtersForm.classList.add('map__filters--disabled');
+  setInteractiveElementsAvailability('select', filtersForm, true);
+  setInteractiveElementsAvailability('fieldset', filtersForm, true);
+};
+
+disableMapFilters();
+
+const enableMapFilters = () => {
+  filtersForm.classList.remove('map__filters--disabled');
+  setInteractiveElementsAvailability('select', filtersForm, false);
+  setInteractiveElementsAvailability('fieldset', filtersForm, false);
+};
+
+export { resetFilters, enableMapFilters };
