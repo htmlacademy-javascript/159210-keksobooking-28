@@ -1,7 +1,6 @@
-import { getData } from './api.js';
+import { getData, GET_DATA_ERROR_MESSAGE } from './api.js';
+import { enableMapFilters } from './filters.js';
 import { showAlert } from './util.js';
-import { filterByType, filterByPrice, filterByRooms, filterByGuests,
-  filterByFeatures } from './filters.js';
 
 const PLACE_TYPES = {
   flat: 'Квартира',
@@ -192,20 +191,18 @@ const rerenderMarkers = (data) => {
 };
 
 let ads = [];
-let filteredAds = [];
 
 const initData = (data) => {
   ads = data;
   rerenderMarkers(ads);
+  enableMapFilters();
 };
 
-const filterData = () => {
-  filteredAds = filterByFeatures(filterByGuests(filterByRooms(filterByPrice(filterByType(ads)))));
-
-  rerenderMarkers(filteredAds);
-};
-
-getData(initData, showAlert);
+getData()
+  .then(initData)
+  .catch(() => {
+    showAlert(GET_DATA_ERROR_MESSAGE);
+  });
 
 function resetMap() {
   if (document.querySelector('.leaflet-popup')) {
@@ -214,7 +211,6 @@ function resetMap() {
 
   map.setView(DEFAULT_COORDINATES, DEFAULT_ZOOM);
   mainMarker.setLatLng(DEFAULT_COORDINATES);
-  setAddress(DEFAULT_COORDINATES.lat, DEFAULT_COORDINATES.lng);
 }
 
-export { isMapInit, renderMarkers, filterData, resetMap };
+export { isMapInit, renderMarkers, rerenderMarkers, resetMap, ads };
