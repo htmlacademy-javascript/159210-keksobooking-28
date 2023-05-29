@@ -89,11 +89,11 @@
         </fieldset>
         <fieldset class="ad-form__element ad-form__element--wide">
           <label class="ad-form__label" for="title">Заголовок объявления</label>
-          <input required id="title" name="title" type="text" placeholder="Милая, уютная квартирка в центре Токио">
+          <input id="title" name="title" type="text" placeholder="Милая, уютная квартирка в центре Токио">
         </fieldset>
         <fieldset class="ad-form__element ad-form__element--wide">
           <label class="ad-form__label" for="address">Адрес (координаты)</label>
-          <input readonly id="address" name="address" type="text">
+          <input readonly id="address" name="address" type="text" value="35.68950, 139.69171">
         </fieldset>
         <fieldset class="ad-form__element">
           <label class="ad-form__label" for="type">Тип жилья</label>
@@ -107,7 +107,7 @@
         </fieldset>
         <fieldset class="ad-form__element">
           <label class="ad-form__label" for="price">Цена за ночь, руб.</label>
-          <input required id="price" name="price" type="number" placeholder="5000">
+          <input id="price" name="price" type="number" placeholder="1000">
           <div class="ad-form__slider" id="slider"></div>
         </fieldset>
         <fieldset class="ad-form__element ad-form__element--time">
@@ -176,6 +176,7 @@
         </fieldset>
       </form>
     </section>
+    <div class="alert-container hidden"></div>
   </main>
 
   <footer class="footer container">
