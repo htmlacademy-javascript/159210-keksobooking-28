@@ -3,6 +3,10 @@ import { getData, sendData } from './api.js';
 import { showAlert, isEscapeKey, debounce, setInteractiveElementsAvailability } from './util.js';
 import { resetFilters } from './filters.js';
 
+const AD_TITLE_LENGTH = {
+  min: 30,
+  max: 100
+};
 const MAX_AD_PRICE = 100000;
 const MIN_AD_PRICE = {
   bungalow: 0,
@@ -140,12 +144,12 @@ const ERROR_MESSAGES = {
 
 pristine.addValidator(titleField, validateAdTitle, ERROR_MESSAGES.title);
 pristine.addValidator(priceField, validateAdLowPrice, () => ERROR_MESSAGES.priceLow(MIN_AD_PRICE[typeField.value]));
-pristine.addValidator(priceField, validateAdHighPrice, () => ERROR_MESSAGES.priceHigh);
+pristine.addValidator(priceField, validateAdHighPrice, ERROR_MESSAGES.priceHigh);
 pristine.addValidator(placeCapacity, validateCapacity, ERROR_MESSAGES.capacity);
 
 function validateAdTitle(value) {
-  const exp = /[\w\d\s\n\W]{30,100}/i;
-  return exp.test(value);
+  const exp = /[\w\d\s\n\W]/i;
+  return exp.test(value) && value.length >= AD_TITLE_LENGTH.min && value.length <= AD_TITLE_LENGTH.max;
 }
 
 function validateAdLowPrice(value) {
@@ -157,7 +161,6 @@ function validateAdLowPrice(value) {
 
 function validateAdHighPrice(value) {
   const exp = /[0-9]/g;
-
   return exp.test(value) && value <= MAX_AD_PRICE;
 }
 

@@ -1,5 +1,5 @@
 import { getData, GET_DATA_ERROR_MESSAGE } from './api.js';
-import { enableMapFilters } from './filters.js';
+import { enableMapFilters, filterData } from './filters.js';
 import { showAlert } from './util.js';
 
 const PLACE_TYPES = {
@@ -202,6 +202,11 @@ const initData = (data) => {
   enableMapFilters();
 };
 
+const showFilteredData = () => {
+  const filteredData = filterData(ads);
+  rerenderMarkers(filteredData);
+};
+
 getData()
   .then(initData)
   .catch(() => {
@@ -217,4 +222,4 @@ function resetMap() {
   mainMarker.setLatLng(DEFAULT_COORDINATES);
 }
 
-export { isMapInit, renderMarkers, rerenderMarkers, resetMap, ads };
+export { isMapInit, renderMarkers, rerenderMarkers, resetMap, showFilteredData };

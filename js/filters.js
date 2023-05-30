@@ -1,5 +1,5 @@
 import { debounce, setInteractiveElementsAvailability } from './util.js';
-import { ads, rerenderMarkers } from './map.js';
+import { showFilteredData } from './map.js';
 
 const DEFAULT_FILTER_VALUE = 'any';
 
@@ -43,14 +43,14 @@ filtersForm.addEventListener('change', (evt) => {
       currentFilters.features.splice(index, 1);
     }
   }
-  debounce(() => filterData(), RERENDER_DELAY)();
+  debounce(() => showFilteredData(), RERENDER_DELAY)();
 });
 
 let filteredAds = [];
 
-function filterData() {
+function filterData(data) {
   // filter by type
-  filteredAds = ads;
+  filteredAds = data;
   filteredAds = currentFilters.type === DEFAULT_FILTER_VALUE ?
     filteredAds :
     filteredAds.filter((item) => item.offer.type === currentFilters.type);
@@ -97,7 +97,7 @@ function filterData() {
       return false;
     }));
 
-  rerenderMarkers(filteredAds);
+  return filteredAds;
 }
 
 const resetFilters = () => {
@@ -118,4 +118,4 @@ const enableMapFilters = () => {
   setInteractiveElementsAvailability('fieldset', filtersForm, false);
 };
 
-export { resetFilters, enableMapFilters };
+export { resetFilters, enableMapFilters, filterData };
