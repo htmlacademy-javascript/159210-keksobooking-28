@@ -1,9 +1,7 @@
-import { debounce, setInteractiveElementsAvailability } from './util.js';
 import { showFilteredData } from './map.js';
+import { setInteractiveElementsAvailability } from './util.js';
 
 const DEFAULT_FILTER_VALUE = 'any';
-
-const RERENDER_DELAY = 500;
 
 const filtersForm = document.querySelector('.map__filters');
 
@@ -27,24 +25,6 @@ const priceRanges = {
     min: 50000
   }
 };
-
-filtersForm.addEventListener('change', (evt) => {
-  if (evt.target.closest('select')) {
-    const chosenFilter = evt.target.closest('select').id.replace(/housing-/g, '');
-    const filterValue = evt.target.closest('select').value;
-
-    currentFilters[chosenFilter] = filterValue;
-  } else if (evt.target.closest('input')) {
-    const chosenFilter = evt.target.closest('input');
-    if (chosenFilter.checked) {
-      currentFilters.features.push(chosenFilter.value);
-    } else {
-      const index = currentFilters.features.indexOf(chosenFilter.value);
-      currentFilters.features.splice(index, 1);
-    }
-  }
-  debounce(() => showFilteredData(), RERENDER_DELAY)();
-});
 
 let filteredAds = [];
 
@@ -100,8 +80,18 @@ function filterData(data) {
   return filteredAds;
 }
 
-const resetFilters = () => {
+const resetCurrentFilters = () => {
+  currentFilters.type = DEFAULT_FILTER_VALUE;
+  currentFilters.price = DEFAULT_FILTER_VALUE;
+  currentFilters.rooms = DEFAULT_FILTER_VALUE;
+  currentFilters.guests = DEFAULT_FILTER_VALUE;
+  currentFilters.features = [];
+};
+
+const resetFiltersForm = () => {
   filtersForm.reset();
+  resetCurrentFilters();
+  showFilteredData();
 };
 
 const disableMapFilters = () => {
@@ -110,12 +100,30 @@ const disableMapFilters = () => {
   setInteractiveElementsAvailability('fieldset', filtersForm, true);
 };
 
-disableMapFilters();
-
 const enableMapFilters = () => {
   filtersForm.classList.remove('map__filters--disabled');
   setInteractiveElementsAvailability('select', filtersForm, false);
   setInteractiveElementsAvailability('fieldset', filtersForm, false);
 };
 
-export { resetFilters, enableMapFilters, filterData };
+filtersForm.addEventListener('change', (evt) => {
+  if (evt.target.closest('select')) {
+    const chosenFilter = evt.target.closest('select').id.replace(/housing-/g, '');
+    const filterValue = evt.target.closest('select').value;
+
+    currentFilters[chosenFilter] = filterValue;
+  } else if (evt.target.closest('input')) {
+    const chosenFilter = evt.target.closest('input');
+    if (chosenFilter.checked) {
+      currentFilters.features.push(chosenFilter.value);
+    } else {
+      const index = currentFilters.features.indexOf(chosenFilter.value);
+      currentFilters.features.splice(index, 1);
+    }
+  }
+  showFilteredData();
+});
+
+disableMapFilters();
+
+export { resetFiltersForm, enableMapFilters, filterData };

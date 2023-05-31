@@ -1,6 +1,6 @@
 import { getData, GET_DATA_ERROR_MESSAGE } from './api.js';
 import { enableMapFilters, filterData } from './filters.js';
-import { showAlert } from './util.js';
+import { showAlert, debounce } from './util.js';
 
 const PLACE_TYPES = {
   flat: 'Квартира',
@@ -39,6 +39,8 @@ const MAX_MARKERS = 10;
 
 const MAP_MARKER_PAN_PADDING = [100, 100];
 
+const RERENDER_DELAY = 500;
+
 const addressField = document.querySelector('#address');
 
 let isMapInit = false;
@@ -46,8 +48,6 @@ let isMapInit = false;
 const setAddress = (lat, lng) => {
   addressField.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 };
-
-setAddress(DEFAULT_COORDINATES.lat, DEFAULT_COORDINATES.lng);
 
 const map = L.map('map-canvas')
   .on('load', () => {
@@ -72,17 +72,6 @@ const mainMarker = L.marker(DEFAULT_COORDINATES, {
   icon: mainPinIcon,
   autoPan: true,
   autoPanPadding: L.point(MAP_MARKER_PAN_PADDING)
-});
-
-L.tileLayer(TILE_LAYER, {
-  attribution: COPYRIGHT
-}).addTo(map);
-
-mainMarker.addTo(map);
-
-mainMarker.on('moveend', (evt) => {
-  const adress = evt.target.getLatLng();
-  setAddress(adress.lat, adress.lng);
 });
 
 const createCustomPopup = (entry) => {
@@ -202,10 +191,10 @@ const initData = (data) => {
   enableMapFilters();
 };
 
-const showFilteredData = () => {
+const showFilteredData = debounce(() => {
   const filteredData = filterData(ads);
   rerenderMarkers(filteredData);
-};
+}, RERENDER_DELAY);
 
 getData()
   .then(initData)
@@ -222,4 +211,19 @@ function resetMap() {
   mainMarker.setLatLng(DEFAULT_COORDINATES);
 }
 
-export { isMapInit, renderMarkers, rerenderMarkers, resetMap, showFilteredData };
+const checkIsMapInit = () => isMapInit;
+
+setAddress(DEFAULT_COORDINATES.lat, DEFAULT_COORDINATES.lng);
+
+L.tileLayer(TILE_LAYER, {
+  attribution: COPYRIGHT
+}).addTo(map);
+
+mainMarker.addTo(map);
+
+mainMarker.on('moveend', (evt) => {
+  const adress = evt.target.getLatLng();
+  setAddress(adress.lat, adress.lng);
+});
+
+export { checkIsMapInit, renderMarkers, rerenderMarkers, resetMap, showFilteredData };

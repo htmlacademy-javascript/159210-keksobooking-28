@@ -1,7 +1,7 @@
-import { isMapInit, renderMarkers, resetMap } from './map.js';
+import { checkIsMapInit, renderMarkers, resetMap } from './map.js';
 import { getData, sendData } from './api.js';
 import { showAlert, isEscapeKey, debounce, setInteractiveElementsAvailability } from './util.js';
-import { resetFilters } from './filters.js';
+import { resetFiltersForm } from './filters.js';
 
 const AD_TITLE_LENGTH = {
   min: 30,
@@ -36,6 +36,8 @@ const priceField = adForm.querySelector('#price');
 const typeField = adForm.querySelector('#type');
 const timeInField = adForm.querySelector('#timein');
 const timeOutField = adForm.querySelector('#timeout');
+const timeInOptions = timeInField.querySelectorAll('option');
+const timeOutOptions = timeOutField.querySelectorAll('option');
 const sliderElement = adForm.querySelector('#slider');
 const roomNumber = adForm.querySelector('#room_number');
 const placeCapacity = adForm.querySelector('#capacity');
@@ -60,12 +62,6 @@ const enableForm = () => {
   setInteractiveElementsAvailability('button', adForm, false);
 };
 
-disableForm();
-
-if (isMapInit) {
-  enableForm();
-}
-
 const blockSubmitBtn = () => {
   submitBtn.disabled = true;
 };
@@ -85,18 +81,18 @@ const showModal = (result) => {
     .content.querySelector(`.${result}`);
   const modalElement = modalTemplate.cloneNode(true);
 
-  document.body.appendChild(modalElement);
-
-  document.querySelector(`.${result}`).addEventListener('click', () => {
+  modalElement.addEventListener('click', () => {
     closeModal(result);
   });
+
+  document.body.appendChild(modalElement);
 
   document.addEventListener('keydown', onDocumentKeydown);
 };
 
 const clearForm = () => {
   adForm.reset();
-  resetFilters();
+  resetFiltersForm();
   sliderElement.noUiSlider.reset();
 };
 
@@ -142,11 +138,6 @@ const ERROR_MESSAGES = {
   capacity: 'Cтолько гостей не разместить в таком количестве комнат'
 };
 
-pristine.addValidator(titleField, validateAdTitle, ERROR_MESSAGES.title);
-pristine.addValidator(priceField, validateAdLowPrice, () => ERROR_MESSAGES.priceLow(MIN_AD_PRICE[typeField.value]));
-pristine.addValidator(priceField, validateAdHighPrice, ERROR_MESSAGES.priceHigh);
-pristine.addValidator(placeCapacity, validateCapacity, ERROR_MESSAGES.capacity);
-
 function validateAdTitle(value) {
   const exp = /[\w\d\s\n\W]/i;
   return exp.test(value) && value.length >= AD_TITLE_LENGTH.min && value.length <= AD_TITLE_LENGTH.max;
@@ -168,25 +159,6 @@ function validateCapacity(value) {
   return PLACE_CAPACITY[roomNumber.value].includes(Number(value));
 }
 
-typeField.addEventListener('change', () => {
-  priceField.placeholder = MIN_AD_PRICE[typeField.value];
-  pristine.validate(priceField);
-});
-
-timeInField.addEventListener('change', (evt) => {
-  const timeOutOptions = timeOutField.querySelectorAll('option');
-  timeOutOptions.forEach((option) => {
-    option.selected = option.value === evt.target.value;
-  });
-});
-
-timeOutField.addEventListener('change', (evt) => {
-  const timeInOptions = timeInField.querySelectorAll('option');
-  timeInOptions.forEach((option) => {
-    option.selected = option.value === evt.target.value;
-  });
-});
-
 const setAdFormSubmit = () => {
   adForm.addEventListener('submit', (evt) => {
     evt.preventDefault();
@@ -207,47 +179,6 @@ const setAdFormSubmit = () => {
     }
   });
 };
-
-noUiSlider.create(sliderElement, {
-  range: {
-    min: SLIDER_SETS.min,
-    max: SLIDER_SETS.max,
-  },
-  start: SLIDER_SETS.start,
-  step: SLIDER_SETS.step,
-  connect: 'lower',
-  format: {
-    to: function (value) {
-      return value.toFixed(0);
-    },
-    from: function (value) {
-      return parseFloat(value).toFixed(2);
-    },
-  },
-});
-
-sliderElement.noUiSlider.on('update', () => {
-  priceField.value = sliderElement.noUiSlider.get();
-  pristine.validate(priceField);
-});
-
-priceField.addEventListener('change', () => {
-  sliderElement.noUiSlider.set(priceField.value);
-  pristine.validate(priceField);
-});
-
-placeCapacity.addEventListener('change', () => {
-  pristine.validate(placeCapacity);
-});
-
-roomNumber.addEventListener('change', () => {
-  pristine.validate(placeCapacity);
-});
-
-resetBtn.addEventListener('click', () => {
-  clearForm();
-  debounce(() => resetMap())();
-});
 
 const createImageBlock = (url, parent) => {
   const img = document.createElement('img');
@@ -273,6 +204,71 @@ const uploadImage = (uploadField, previewBlock, purpose) => {
     }
   }
 };
+
+disableForm();
+
+if (checkIsMapInit()) {
+  enableForm();
+}
+
+pristine.addValidator(titleField, validateAdTitle, ERROR_MESSAGES.title);
+pristine.addValidator(priceField, validateAdLowPrice, () => ERROR_MESSAGES.priceLow(MIN_AD_PRICE[typeField.value]));
+pristine.addValidator(priceField, validateAdHighPrice, ERROR_MESSAGES.priceHigh);
+pristine.addValidator(placeCapacity, validateCapacity, ERROR_MESSAGES.capacity);
+
+timeInField.addEventListener('change', (evt) => {
+  timeOutOptions.forEach((option) => {
+    option.selected = option.value === evt.target.value;
+  });
+});
+
+timeOutField.addEventListener('change', (evt) => {
+  timeInOptions.forEach((option) => {
+    option.selected = option.value === evt.target.value;
+  });
+});
+
+noUiSlider.create(sliderElement, {
+  range: {
+    min: SLIDER_SETS.min,
+    max: SLIDER_SETS.max,
+  },
+  start: SLIDER_SETS.start,
+  step: SLIDER_SETS.step,
+  connect: 'lower',
+  format: {
+    to: function (value) {
+      return value.toFixed(0);
+    },
+    from: function (value) {
+      return parseFloat(value).toFixed(2);
+    },
+  },
+});
+
+sliderElement.noUiSlider.on('update', () => {
+  priceField.value = sliderElement.noUiSlider.get();
+  pristine.validate(priceField);
+});
+
+priceField.addEventListener('input', () => {
+  sliderElement.noUiSlider.set(priceField.value);
+  priceField.placeholder = MIN_AD_PRICE[typeField.value];
+  pristine.validate(priceField);
+});
+
+placeCapacity.addEventListener('change', () => {
+  pristine.validate(placeCapacity);
+});
+
+roomNumber.addEventListener('change', () => {
+  pristine.validate(placeCapacity);
+});
+
+resetBtn.addEventListener('click', () => {
+  clearForm();
+  debounce(() => resetMap())();
+});
 
 uploadAvatarField.addEventListener('change', () => {
   uploadImage(uploadAvatarField, avatarPreview, 'avatar');
