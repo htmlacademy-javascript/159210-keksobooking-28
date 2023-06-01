@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="vendor/nouislider/nouislider.css">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <title>Кексобукинг</title>
 </head>
@@ -71,7 +73,7 @@
     <!-- Форма объявления -->
     <section class="notice">
       <h2 class="notice__title">Ваше объявление</h2>
-      <form class="ad-form" method="post" enctype="multipart/form-data" autocomplete="off">
+      <form class="ad-form" action="https://28.javascript.pages.academy/keksobooking" method="post" enctype="multipart/form-data" autocomplete="off">
         <fieldset class="ad-form-header">
           <legend class="ad-form-header__title">Ваша фотография (для карты)</legend>
           <div class="ad-form-header__upload">
@@ -91,7 +93,7 @@
         </fieldset>
         <fieldset class="ad-form__element ad-form__element--wide">
           <label class="ad-form__label" for="address">Адрес (координаты)</label>
-          <input id="address" name="address" type="text">
+          <input readonly id="address" name="address" type="text" value="35.68950, 139.69171">
         </fieldset>
         <fieldset class="ad-form__element">
           <label class="ad-form__label" for="type">Тип жилья</label>
@@ -105,8 +107,8 @@
         </fieldset>
         <fieldset class="ad-form__element">
           <label class="ad-form__label" for="price">Цена за ночь, руб.</label>
-          <input id="price" name="price" type="number" placeholder="5000">
-          <div class="ad-form__slider"></div>
+          <input id="price" name="price" type="number" placeholder="1000">
+          <div class="ad-form__slider" id="slider"></div>
         </fieldset>
         <fieldset class="ad-form__element ad-form__element--time">
           <label class="ad-form__label" for="timein">Время заезда и выезда</label>
@@ -174,6 +176,7 @@
         </fieldset>
       </form>
     </section>
+    <div class="alert-container hidden"></div>
   </main>
 
   <footer class="footer container">
@@ -229,5 +232,9 @@
     </div>
   </template>
 
+  <script src="./vendor/pristine/pristine.min.js" type="text/javascript"></script>
+  <script src="./vendor/leaflet/leaflet.js" type="text/javascript"></script>
+  <script src="./vendor/nouislider/nouislider.js" type="text/javascript"></script>
+  <script src="./js/main.js" type="module"></script>
 </body>
 </html>
