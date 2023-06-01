@@ -28,7 +28,7 @@ const priceRanges = {
 
 let filteredAds = [];
 
-function filterData(data) {
+const filterData = (data) => {
   // filter by type
   filteredAds = data;
   filteredAds = currentFilters.type === DEFAULT_FILTER_VALUE ?
@@ -78,7 +78,7 @@ function filterData(data) {
     }));
 
   return filteredAds;
-}
+};
 
 const resetCurrentFilters = () => {
   currentFilters.type = DEFAULT_FILTER_VALUE;
