@@ -202,14 +202,15 @@ getData()
     showAlert(GET_DATA_ERROR_MESSAGE);
   });
 
-function resetMap() {
-  if (document.querySelector('.leaflet-popup')) {
-    document.querySelector('.leaflet-popup').remove();
+const resetMap = () => {
+  const mapPopup = document.querySelector('.leaflet-popup');
+  if (mapPopup) {
+    mapPopup.remove();
   }
 
   map.setView(DEFAULT_COORDINATES, DEFAULT_ZOOM);
   mainMarker.setLatLng(DEFAULT_COORDINATES);
-}
+};
 
 const checkIsMapInit = () => isMapInit;
 

@@ -30,6 +30,18 @@ const PLACE_CAPACITY = {
 
 const FILE_TYPES = ['jpg', 'jpeg', 'png'];
 
+const ERROR_MESSAGES = {
+  title: 'Длина заголовка должна быть от 30 до 100 символов',
+  priceLow: (limit) => `Для указанного типа жилья цена должна быть не менее ${limit} руб.`,
+  priceHigh: `Цена не может быть более ${MAX_AD_PRICE} руб.`,
+  capacity: 'Cтолько гостей не разместить в таком количестве комнат'
+};
+
+const UPLOAD_IMAGES_PURPOSES = {
+  avatar: 'avatar',
+  photo: 'photo'
+};
+
 const adForm = document.querySelector('.ad-form');
 const titleField = adForm.querySelector('#title');
 const priceField = adForm.querySelector('#price');
@@ -105,10 +117,7 @@ const onError = () => showModal('error');
 const isModalOpen = (modalName) => {
   const modal = document.querySelector(`.${modalName}`);
 
-  if (modal) {
-    return true;
-  }
-  return false;
+  return modal !== null;
 };
 
 function onDocumentKeydown(evt) {
@@ -131,33 +140,24 @@ const pristine = new Pristine(adForm, {
   errorTextClass: 'text-help'
 });
 
-const ERROR_MESSAGES = {
-  title: 'Длина заголовка должна быть от 30 до 100 символов',
-  priceLow: (limit) => `Для указанного типа жилья цена должна быть не менее ${limit} руб.`,
-  priceHigh: `Цена не может быть более ${MAX_AD_PRICE} руб.`,
-  capacity: 'Cтолько гостей не разместить в таком количестве комнат'
-};
-
-function validateAdTitle(value) {
+const validateAdTitle = (value) => {
   const exp = /[\w\d\s\n\W]/i;
   return exp.test(value) && value.length >= AD_TITLE_LENGTH.min && value.length <= AD_TITLE_LENGTH.max;
-}
+};
 
-function validateAdLowPrice(value) {
+const validateAdLowPrice = (value) => {
   const exp = /[0-9]/g;
   const minPrice = MIN_AD_PRICE[typeField.value];
 
   return exp.test(value) && value >= minPrice;
-}
+};
 
-function validateAdHighPrice(value) {
+const validateAdHighPrice = (value) => {
   const exp = /[0-9]/g;
   return exp.test(value) && value <= MAX_AD_PRICE;
-}
+};
 
-function validateCapacity(value) {
-  return PLACE_CAPACITY[roomNumber.value].includes(Number(value));
-}
+const validateCapacity = (value) => PLACE_CAPACITY[roomNumber.value].includes(Number(value));
 
 const setAdFormSubmit = () => {
   adForm.addEventListener('submit', (evt) => {
@@ -196,9 +196,9 @@ const uploadImage = (uploadField, previewBlock, purpose) => {
   const matches = FILE_TYPES.some((ft) => fileName.endsWith(ft));
 
   if (matches) {
-    if (purpose === 'avatar') {
+    if (purpose === UPLOAD_IMAGES_PURPOSES.avatar) {
       previewBlock.src = URL.createObjectURL(file);
-    } else if (purpose === 'photo') {
+    } else if (purpose === UPLOAD_IMAGES_PURPOSES.photo) {
       previewBlock.innerHTML = '';
       createImageBlock(URL.createObjectURL(file), previewBlock);
     }
